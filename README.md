@@ -1,6 +1,6 @@
 # Chatto Pulumi Provider
 
-Manage [Chatto](https://chatto.run) servers with Pulumi. The provider supports
+Manage [Chatto](https://chatto.run) servers with [Pulumi](https://www.pulumi.com). The provider supports
 these resources:
 
 | Resource                      | Purpose                                                              | Resource ID                                       |
