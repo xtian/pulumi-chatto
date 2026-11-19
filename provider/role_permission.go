@@ -2,12 +2,8 @@ package provider
 
 import (
 	"context"
-	"fmt"
-	"slices"
-	"strings"
 
 	"connectrpc.com/connect"
-	p "github.com/pulumi/pulumi-go-provider"
 	"github.com/pulumi/pulumi-go-provider/infer"
 
 	adminv1 "github.com/xtian/pulumi-chatto/internal/pb/chatto/admin/v1"
@@ -111,20 +107,7 @@ func (RolePermission) Check(
 		return infer.CheckResponse[RolePermissionArgs]{Inputs: args, Failures: failures}, err
 	}
 
-	kind := scopeKind(args)
-	needsID := kind == ScopeKindGroup || kind == ScopeKindRoom
-	switch {
-	case needsID && deref(args.ScopeID) == "":
-		failures = append(failures, checkFailure("scopeId", fmt.Sprintf("is required for %s scope", kind)))
-	case !needsID && deref(args.ScopeID) != "":
-		failures = append(failures, checkFailure("scopeId", fmt.Sprintf("must be unset for %s scope", kind)))
-	}
-
-	if scopes, known := permissionScopes[args.Permission]; known && !slices.Contains(scopes, kind) {
-		failures = append(failures, checkFailure("scopeKind",
-			fmt.Sprintf("%s can't be set at %s scope; it supports %v", args.Permission, kind, scopes)))
-	}
-
+	failures = checkScope(args.Permission, args.ScopeKind, args.ScopeID)
 	return infer.CheckResponse[RolePermissionArgs]{Inputs: args, Failures: failures}, nil
 }
 
@@ -154,9 +137,9 @@ func (RolePermission) Read(
 
 	res, err := clientFrom(ctx).permissions.ListRolePermissionDecisions(ctx,
 		connect.NewRequest(&adminv1.ListRolePermissionDecisionsRequest{
-			IncludeDirectMessageScope: scopeKind(args) == ScopeKindDM,
+			IncludeDirectMessageScope: resolvedScopeKind(args.ScopeKind) == ScopeKindDM,
 			RoleName:                  args.RoleName,
-			Scope:                     apiScope(args),
+			Scope:                     permissionScope(args.ScopeKind, args.ScopeID),
 		}))
 	if isNotFound(err) {
 		return infer.ReadResponse[RolePermissionArgs, RolePermissionState]{}, nil
@@ -165,27 +148,17 @@ func (RolePermission) Read(
 		return infer.ReadResponse[RolePermissionArgs, RolePermissionState]{}, err
 	}
 
-	for _, decision := range res.Msg.GetDecisions() {
-		scope := decision.GetScope()
-		if decision.GetPermission() != string(args.Permission) ||
-			scope.GetKind() != scopeKinds[scopeKind(args)] ||
-			scope.GetId() != deref(args.ScopeID) {
-			continue
-		}
-
-		for candidate, value := range decisions {
-			if value == decision.GetOverride() {
-				args.Decision = candidate
-				return infer.ReadResponse[RolePermissionArgs, RolePermissionState]{
-					ID:     req.ID,
-					Inputs: args,
-					State:  RolePermissionState{args},
-				}, nil
-			}
-		}
+	decision, ok := findDecision(res.Msg.GetDecisions(), args.Permission, args.ScopeKind, args.ScopeID)
+	if !ok {
+		return infer.ReadResponse[RolePermissionArgs, RolePermissionState]{}, nil
 	}
 
-	return infer.ReadResponse[RolePermissionArgs, RolePermissionState]{}, nil
+	args.Decision = decision
+	return infer.ReadResponse[RolePermissionArgs, RolePermissionState]{
+		ID:     req.ID,
+		Inputs: args,
+		State:  RolePermissionState{args},
+	}, nil
 }
 
 // Update changes the decision.
@@ -214,49 +187,30 @@ func setRolePermission(ctx context.Context, args RolePermissionArgs, decision ad
 		Decision:   decision,
 		Permission: string(args.Permission),
 		RoleName:   args.RoleName,
-		Scope:      apiScope(args),
+		Scope:      permissionScope(args.ScopeKind, args.ScopeID),
 	}))
 	return err
 }
 
-func apiScope(args RolePermissionArgs) *adminv1.PermissionScope {
-	return &adminv1.PermissionScope{Id: deref(args.ScopeID), Kind: scopeKinds[scopeKind(args)]}
-}
-
-func scopeKind(args RolePermissionArgs) ScopeKind {
-	if args.ScopeKind == nil {
-		return ScopeKindServer
-	}
-	return *args.ScopeKind
-}
-
 func rolePermissionID(args RolePermissionArgs) string {
-	parts := []string{args.RoleName, string(args.Permission), string(scopeKind(args))}
-	if id := deref(args.ScopeID); id != "" {
-		parts = append(parts, id)
-	}
-	return strings.Join(parts, "/")
+	return scopedPermissionID(scopedPermission{
+		Permission: args.Permission,
+		ScopeID:    args.ScopeID,
+		ScopeKind:  args.ScopeKind,
+		Subject:    args.RoleName,
+	})
 }
 
 func parseRolePermissionID(id string) (RolePermissionArgs, error) {
-	parts := strings.Split(id, "/")
-	if len(parts) < 3 || len(parts) > 4 {
-		return RolePermissionArgs{}, fmt.Errorf(
-			"role permission ID %q should look like <roleName>/<permission>/<scopeKind>[/<scopeId>]", id)
+	sp, err := parseScopedPermissionID(id, "role permission", "roleName")
+	if err != nil {
+		return RolePermissionArgs{}, err
 	}
 
-	kind := ScopeKind(parts[2])
-	if _, ok := scopeKinds[kind]; !ok {
-		return RolePermissionArgs{}, fmt.Errorf("unknown scope kind %q in role permission ID %q", parts[2], id)
-	}
-
-	args := RolePermissionArgs{Permission: Permission(parts[1]), RoleName: parts[0], ScopeKind: &kind}
-	if len(parts) == 4 {
-		args.ScopeID = &parts[3]
-	}
-	return args, nil
-}
-
-func checkFailure(property, reason string) p.CheckFailure {
-	return p.CheckFailure{Property: property, Reason: reason}
+	return RolePermissionArgs{
+		Permission: sp.Permission,
+		RoleName:   sp.Subject,
+		ScopeID:    sp.ScopeID,
+		ScopeKind:  sp.ScopeKind,
+	}, nil
 }

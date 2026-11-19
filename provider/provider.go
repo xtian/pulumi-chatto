@@ -19,7 +19,7 @@ const Name = "chatto"
 func Provider() (p.Provider, error) {
 	return infer.NewProviderBuilder().
 		WithConfig(infer.Config(&Config{})).
-		WithDescription("Manage Chatto rooms, room groups, roles, and role permissions.").
+		WithDescription("Manage Chatto bots, bot permissions, rooms, room groups, room members, roles, and role permissions.").
 		WithDisplayName("Chatto").
 		WithGoImportPath("github.com/xtian/pulumi-chatto/sdk/go/chatto").
 		WithHomepage("https://github.com/xtian/pulumi-chatto").
@@ -29,11 +29,15 @@ func Provider() (p.Provider, error) {
 		WithPluginDownloadURL("github://api.github.com/xtian/pulumi-chatto").
 		WithPublisher("xtian").
 		WithRepository("https://github.com/xtian/pulumi-chatto").
+		WithFunctions(infer.Function(&GetViewer{})).
 		WithResources(
+			infer.Resource(&Bot{}),
+			infer.Resource(&BotPermission{}),
 			infer.Resource(&Role{}),
 			infer.Resource(&RolePermission{}),
 			infer.Resource(&Room{}),
 			infer.Resource(&RoomGroup{}),
+			infer.Resource(&RoomMember{}),
 		).
 		Build()
 }

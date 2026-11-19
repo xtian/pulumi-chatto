@@ -1,6 +1,6 @@
 name: chatto-example
 runtime: yaml
-description: Provisions a Chatto room group, room, role, and role permissions
+description: Provisions a Chatto room group, room, role, role permissions, bot, and bot permission
 
 config:
   suffix:
@@ -45,6 +45,26 @@ resources:
       roleName: ${tech.name}
       scopeId: ${alerts.id}
       scopeKind: room
+
+  alertBot:
+    type: chatto:Bot
+    properties:
+      displayName: Alerts
+      login: alert-bot${suffix}
+
+  alertBotPosts:
+    type: chatto:BotPermission
+    properties:
+      botUserId: ${alertBot.id}
+      permission: message.post
+      scopeId: ${alerts.id}
+      scopeKind: room
+
+  alertBotInAlerts:
+    type: chatto:RoomMember
+    properties:
+      roomId: ${alerts.id}
+      userId: ${alertBot.id}
 
 outputs:
   alertsRoomId: ${alerts.id}
