@@ -1,0 +1,7 @@
+/bin/
+/dist/
+/schema.json
+/sdk/
+/mise.local.toml
+.context/
+/examples/*/Pulumi.*.yaml

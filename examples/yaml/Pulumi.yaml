@@ -1,0 +1,51 @@
+name: chatto-example
+runtime: yaml
+description: Provisions a Chatto room group, room, role, and role permissions
+
+config:
+  suffix:
+    type: string
+    default: ""
+
+resources:
+  operations:
+    type: chatto:RoomGroup
+    properties:
+      description: Infrastructure and on-call
+      name: Operations${suffix}
+
+  alerts:
+    type: chatto:Room
+    properties:
+      description: Automated error reports
+      groupId: ${operations.id}
+      name: alerts${suffix}
+      threadingMode: required
+
+  tech:
+    type: chatto:Role
+    properties:
+      description: Tech department
+      displayName: Tech
+      name: tech${suffix}
+      pingable: true
+
+  techManagesRooms:
+    type: chatto:RolePermission
+    properties:
+      decision: allow
+      permission: room.manage
+      roleName: ${tech.name}
+
+  techPinsInAlerts:
+    type: chatto:RolePermission
+    properties:
+      decision: allow
+      permission: message.pin
+      roleName: ${tech.name}
+      scopeId: ${alerts.id}
+      scopeKind: room
+
+outputs:
+  alertsRoomId: ${alerts.id}
+  operationsGroupId: ${operations.id}

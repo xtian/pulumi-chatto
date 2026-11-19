@@ -1,0 +1,32 @@
+version: 2
+project_name: pulumi-chatto
+
+builds:
+  - binary: pulumi-resource-chatto
+    env:
+      - CGO_ENABLED=0
+    main: ./cmd/pulumi-resource-chatto
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+
+archives:
+  - formats: [tar.gz]
+    files:
+      - LICENSES/Apache-2.0.txt
+    # Pulumi downloads plugins by this exact name from the GitHub release.
+    name_template: pulumi-resource-chatto-v{{ .Version }}-{{ .Os }}-{{ .Arch }}
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  use: github-native
