@@ -221,10 +221,10 @@
           subPackages = [ "cmd/pulumi-resource-chatto" ];
           vendorHash = "sha256-gx4Zh2jdxYXQLGZ2JUKDSUhau0u7cI+pu6+Epkxw09Y=";
           env.CGO_ENABLED = "0";
+          # main.version stays at its semver default: Pulumi rejects a commit hash as a plugin version
           ldflags = [
             "-s"
             "-w"
-            "-X main.version=${self.shortRev or "0.0.1-dev"}"
           ];
           meta.mainProgram = "pulumi-resource-chatto";
         };

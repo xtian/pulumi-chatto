@@ -10,6 +10,22 @@ these resources:
 | `chatto:index:Role`           | A custom server role                                                 | Role name                                         |
 | `chatto:index:RolePermission` | An allow or deny decision for a role at server, group, or room scope | `<roleName>/<permission>/<scopeKind>[/<scopeId>]` |
 
+## Installation
+
+The provider is not in the Pulumi Registry. Add it to `Pulumi.yaml` with the
+URL of its GitHub releases, then run `pulumi install`:
+
+```yaml
+packages:
+  chatto:
+    source: chatto
+    version: 0.1.0
+    pluginDownloadURL: github://api.github.com/xtian/pulumi-chatto
+```
+
+`pulumi install` generates a local SDK in `sdks/`. In TypeScript, import it
+as `@xtian/chatto`.
+
 ## Configuration
 
 | Key             | Environment variable | Description                                                    |
