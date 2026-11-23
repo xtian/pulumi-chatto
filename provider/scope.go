@@ -19,14 +19,14 @@ type scopedPermission struct {
 }
 
 // checkScope requires a scope ID exactly for group and room scopes, and requires a scope that
-// the permission supports.
-func checkScope(permission Permission, kind *ScopeKind, scopeID *string) []p.CheckFailure {
+// the permission supports. A computed scope ID (unknown during preview) counts as set.
+func checkScope(permission Permission, kind *ScopeKind, scopeID *string, scopeIDComputed bool) []p.CheckFailure {
 	var failures []p.CheckFailure
 
 	resolved := resolvedScopeKind(kind)
 	needsID := resolved == ScopeKindGroup || resolved == ScopeKindRoom
 	switch {
-	case needsID && deref(scopeID) == "":
+	case needsID && deref(scopeID) == "" && !scopeIDComputed:
 		failures = append(failures, checkFailure("scopeId", fmt.Sprintf("is required for %s scope", resolved)))
 	case !needsID && deref(scopeID) != "":
 		failures = append(failures, checkFailure("scopeId", fmt.Sprintf("must be unset for %s scope", resolved)))

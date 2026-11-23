@@ -28,13 +28,16 @@ func TestCheckScopeRejectsMismatchedScopeIDs(t *testing.T) {
 	group, server := ScopeKindGroup, ScopeKindServer
 	groupID := "Gabc"
 
-	if failures := checkScope("room.join", &group, nil); len(failures) != 1 {
+	if failures := checkScope("room.join", &group, nil, false); len(failures) != 1 {
 		t.Fatalf("checkScope(group without ID) = %v, want one failure", failures)
 	}
-	if failures := checkScope("room.join", &server, &groupID); len(failures) != 1 {
+	if failures := checkScope("room.join", &server, &groupID, false); len(failures) != 1 {
 		t.Fatalf("checkScope(server with ID) = %v, want one failure", failures)
 	}
-	if failures := checkScope("room.join", &group, &groupID); len(failures) != 0 {
+	if failures := checkScope("room.join", &group, &groupID, false); len(failures) != 0 {
 		t.Fatalf("checkScope(group with ID) = %v, want none", failures)
+	}
+	if failures := checkScope("room.join", &group, nil, true); len(failures) != 0 {
+		t.Fatalf("checkScope(group with computed ID) = %v, want none", failures)
 	}
 }

@@ -53,7 +53,7 @@ func (BotPermission) Check(
 		return infer.CheckResponse[BotPermissionArgs]{Inputs: args, Failures: failures}, err
 	}
 
-	failures = checkScope(args.Permission, args.ScopeKind, args.ScopeID)
+	failures = checkScope(args.Permission, args.ScopeKind, args.ScopeID, req.NewInputs.Get("scopeId").IsComputed())
 	if args.Permission == PermissionUserDeleteSelf {
 		failures = append(failures, checkFailure("permission", "Chatto doesn't delegate user.delete-self to bots"))
 	}

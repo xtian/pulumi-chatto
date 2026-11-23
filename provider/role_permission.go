@@ -107,7 +107,7 @@ func (RolePermission) Check(
 		return infer.CheckResponse[RolePermissionArgs]{Inputs: args, Failures: failures}, err
 	}
 
-	failures = checkScope(args.Permission, args.ScopeKind, args.ScopeID)
+	failures = checkScope(args.Permission, args.ScopeKind, args.ScopeID, req.NewInputs.Get("scopeId").IsComputed())
 	return infer.CheckResponse[RolePermissionArgs]{Inputs: args, Failures: failures}, nil
 }
 
