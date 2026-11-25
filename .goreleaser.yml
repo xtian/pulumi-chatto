@@ -21,7 +21,7 @@ builds:
 archives:
   - formats: [tar.gz]
     files:
-      - LICENSES/Apache-2.0.txt
+      - LICENSE
     # Pulumi downloads plugins by this exact name from the GitHub release.
     name_template: pulumi-resource-chatto-v{{ .Version }}-{{ .Os }}-{{ .Arch }}
 
