@@ -76,7 +76,7 @@ type AdminUserServiceClient interface {
 	// Gets server member rows for multiple users. Requires admin.view-users.
 	BatchGetMembers(context.Context, *connect.Request[v1.BatchGetMembersRequest]) (*connect.Response[v1.BatchGetMembersResponse], error)
 	// Gets explicit roles and current assignment limits for one human user.
-	// Requires role.assign, with privileged mode active for human sessions;
+	// Requires effective role.assign;
 	// admin.view-users is not required. Returns NOT_FOUND for an unknown or
 	// deleted user, and FAILED_PRECONDITION for a bot account.
 	GetUserRoleAssignments(context.Context, *connect.Request[v1.GetUserRoleAssignmentsRequest]) (*connect.Response[v1.GetUserRoleAssignmentsResponse], error)
@@ -98,7 +98,8 @@ type AdminUserServiceClient interface {
 	DeleteUser(context.Context, *connect.Request[v1.DeleteUserRequest]) (*connect.Response[v1.DeleteUserResponse], error)
 	// Deactivates or reactivates a human account. Requires user.manage-accounts.
 	// The caller cannot target their own account or an owner account.
-	// Deactivation immediately invalidates existing sessions and prevents sign-in.
+	// Deactivation invalidates existing sessions within one minute in the worst
+	// case and prevents sign-in.
 	// Reactivation permits new sign-ins; old sessions remain invalid.
 	// Repeating the current state succeeds without changing it.
 	SetUserDeactivated(context.Context, *connect.Request[v1.SetUserDeactivatedRequest]) (*connect.Response[v1.SetUserDeactivatedResponse], error)
@@ -253,7 +254,7 @@ type AdminUserServiceHandler interface {
 	// Gets server member rows for multiple users. Requires admin.view-users.
 	BatchGetMembers(context.Context, *connect.Request[v1.BatchGetMembersRequest]) (*connect.Response[v1.BatchGetMembersResponse], error)
 	// Gets explicit roles and current assignment limits for one human user.
-	// Requires role.assign, with privileged mode active for human sessions;
+	// Requires effective role.assign;
 	// admin.view-users is not required. Returns NOT_FOUND for an unknown or
 	// deleted user, and FAILED_PRECONDITION for a bot account.
 	GetUserRoleAssignments(context.Context, *connect.Request[v1.GetUserRoleAssignmentsRequest]) (*connect.Response[v1.GetUserRoleAssignmentsResponse], error)
@@ -275,7 +276,8 @@ type AdminUserServiceHandler interface {
 	DeleteUser(context.Context, *connect.Request[v1.DeleteUserRequest]) (*connect.Response[v1.DeleteUserResponse], error)
 	// Deactivates or reactivates a human account. Requires user.manage-accounts.
 	// The caller cannot target their own account or an owner account.
-	// Deactivation immediately invalidates existing sessions and prevents sign-in.
+	// Deactivation invalidates existing sessions within one minute in the worst
+	// case and prevents sign-in.
 	// Reactivation permits new sign-ins; old sessions remain invalid.
 	// Repeating the current state succeeds without changing it.
 	SetUserDeactivated(context.Context, *connect.Request[v1.SetUserDeactivatedRequest]) (*connect.Response[v1.SetUserDeactivatedResponse], error)

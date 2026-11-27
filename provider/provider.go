@@ -23,7 +23,9 @@ func Provider() (p.Provider, error) {
 		WithDisplayName("Chatto").
 		WithGoImportPath("github.com/xtian/pulumi-chatto/sdk/go/chatto").
 		WithHomepage("https://github.com/xtian/pulumi-chatto").
-		WithKeywords("chatto", "chat", "category/utility").
+		WithKeywords("chatto", "chat", "category/utility", "kind/native").
+		WithLicense("Apache-2.0").
+		WithLogoURL("https://raw.githubusercontent.com/chattocorp/chatto/v0.6.0/apps/docs-website/public/favicon.svg").
 		WithModuleMap(map[tokens.ModuleName]tokens.ModuleName{"provider": "index"}).
 		WithNamespace("xtian").
 		WithPluginDownloadURL("github://api.github.com/xtian/pulumi-chatto").

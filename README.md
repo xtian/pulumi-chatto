@@ -46,8 +46,9 @@ each permission to the bot directly:
   user owns
 - `room.manage` for the room, or `user.manage-accounts`, to add room members
 
-The owner of the bot must also hold these permissions. An admin must activate
-privileged mode before they grant them.
+The owner of the bot must also hold these permissions. If they come from a
+role that requires Shield Mode, the admin must activate Shield Mode before they
+grant them.
 
 ## Example
 
@@ -163,7 +164,7 @@ Pulumi downloads.
 
 ## Chatto Version
 
-The flake pins the Chatto source (`v0.5.0`). The API client and the
+The flake pins the Chatto source (`v0.6.0`). The API client and the
 `Permission` enum come from that version. To support a newer Chatto, change the
 `chatto` input in `flake.nix`, then run `nix flake update chatto` and
 `generate`.

@@ -5,7 +5,7 @@
 const source = process.env["CHATTO_SRC"];
 if (!source) throw new Error("CHATTO_SRC is not set. Run this script in `nix develop`.");
 
-type Definition = { category: string; privileged?: boolean; scopes: readonly string[] };
+type Definition = { category: string; scopes: readonly string[] };
 
 const { PERMISSION_DEFINITIONS } = (await import(
   `${source}/packages/chatto-client/src/util/permissionCatalog.ts`
@@ -32,12 +32,8 @@ const goName = (id: string) =>
     .map((part) => `${part[0]!.toUpperCase()}${part.slice(1)}`)
     .join("");
 
-const describe = ({ category, privileged, scopes }: Definition) => {
-  const scopeText = `Scopes: ${scopes.join(", ")}.`;
-  const privilegeText = privileged ? " A human session needs privileged mode to use it." : "";
-
-  return `Category: ${category}. ${scopeText}${privilegeText}`;
-};
+const describe = ({ category, scopes }: Definition) =>
+  `Category: ${category}. Scopes: ${scopes.join(", ")}.`;
 
 const ids = Object.keys(PERMISSION_DEFINITIONS).sort();
 

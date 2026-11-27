@@ -4,7 +4,7 @@
   inputs = {
     # Source of the generated API client and permission catalog; keep in step with the supported Chatto version
     chatto = {
-      url = "github:chattocorp/chatto/v0.5.0";
+      url = "github:chattocorp/chatto/v0.6.0";
       flake = false;
     };
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";

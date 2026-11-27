@@ -17,10 +17,11 @@ type Role struct{}
 
 // RoleArgs are the inputs of a Role.
 type RoleArgs struct {
-	Description *string `pulumi:"description,optional"`
-	DisplayName *string `pulumi:"displayName,optional"`
-	Name        string  `pulumi:"name"                 provider:"replaceOnChanges"`
-	Pingable    *bool   `pulumi:"pingable,optional"`
+	Description        *string `pulumi:"description,optional"`
+	DisplayName        *string `pulumi:"displayName,optional"`
+	Name               string  `pulumi:"name"                 provider:"replaceOnChanges"`
+	Pingable           *bool   `pulumi:"pingable,optional"`
+	RequiresShieldMode *bool   `pulumi:"requiresShieldMode,optional"`
 }
 
 // RoleState is the stored state of a Role.
@@ -42,6 +43,8 @@ func (a *RoleArgs) Annotate(an infer.Annotator) {
 	an.Describe(&a.Name, "Stable role name, e.g. the name an OIDC group maps to. Changing it replaces the role.")
 	an.Describe(&a.Pingable, "Whether messages can mention the role to notify its members.")
 	an.SetDefault(&a.Pingable, false)
+	an.Describe(&a.RequiresShieldMode, "Whether members must select the role in Shield Mode before its grants apply.")
+	an.SetDefault(&a.RequiresShieldMode, false)
 }
 
 // Annotate describes the outputs in the schema.
@@ -66,10 +69,11 @@ func (Role) Create(ctx context.Context, req infer.CreateRequest[RoleArgs]) (infe
 	}
 
 	res, err := clientFrom(ctx).roles.CreateRole(ctx, connect.NewRequest(&adminv1.CreateRoleRequest{
-		Description: deref(req.Inputs.Description),
-		DisplayName: deref(req.Inputs.DisplayName),
-		Name:        req.Inputs.Name,
-		Pingable:    deref(req.Inputs.Pingable),
+		Description:        deref(req.Inputs.Description),
+		DisplayName:        deref(req.Inputs.DisplayName),
+		Name:               req.Inputs.Name,
+		Pingable:           deref(req.Inputs.Pingable),
+		RequiresShieldMode: deref(req.Inputs.RequiresShieldMode),
 	}))
 	if err != nil {
 		return infer.CreateResponse[RoleState]{}, err
@@ -113,12 +117,16 @@ func (Role) Update(
 	description := deref(req.Inputs.Description)
 	displayName := deref(req.Inputs.DisplayName)
 	pingable := deref(req.Inputs.Pingable)
+	requiresShieldMode := deref(req.Inputs.RequiresShieldMode)
 	_, err := clientFrom(ctx).roles.UpdateRole(ctx, connect.NewRequest(&adminv1.UpdateRoleRequest{
-		Description: &description,
-		DisplayName: &displayName,
-		Name:        req.ID,
-		Pingable:    &pingable,
-		UpdateMask:  &fieldmaskpb.FieldMask{Paths: []string{"description", "display_name", "pingable"}},
+		Description:        &description,
+		DisplayName:        &displayName,
+		Name:               req.ID,
+		Pingable:           &pingable,
+		RequiresShieldMode: &requiresShieldMode,
+		UpdateMask: &fieldmaskpb.FieldMask{
+			Paths: []string{"description", "display_name", "pingable", "requires_shield_mode"},
+		},
 	}))
 
 	return infer.UpdateResponse[RoleState]{Output: state}, err
@@ -134,11 +142,13 @@ func roleArgs(role *apiv1.Role) (RoleArgs, int) {
 	description := role.GetDescription()
 	displayName := role.GetDisplayName()
 	pingable := role.GetPingable()
+	requiresShieldMode := role.GetRequiresShieldMode()
 
 	return RoleArgs{
-		Description: &description,
-		DisplayName: &displayName,
-		Name:        role.GetName(),
-		Pingable:    &pingable,
+		Description:        &description,
+		DisplayName:        &displayName,
+		Name:               role.GetName(),
+		Pingable:           &pingable,
+		RequiresShieldMode: &requiresShieldMode,
 	}, int(role.GetPosition())
 }
