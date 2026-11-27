@@ -1,0 +1,764 @@
+{
+  "name": "chatto",
+  "displayName": "Chatto",
+  "description": "Manage Chatto bots, bot permissions, rooms, room groups, room members, roles, and role permissions.",
+  "keywords": [
+    "chatto",
+    "chat",
+    "category/utility",
+    "kind/native"
+  ],
+  "homepage": "https://github.com/xtian/pulumi-chatto",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/xtian/pulumi-chatto",
+  "logoUrl": "https://raw.githubusercontent.com/chattocorp/chatto/v0.6.0/apps/docs-website/public/favicon.svg",
+  "pluginDownloadURL": "github://api.github.com/xtian/pulumi-chatto",
+  "publisher": "xtian",
+  "namespace": "xtian",
+  "language": {
+    "csharp": {
+      "respectSchemaVersion": true
+    },
+    "go": {
+      "generateResourceContainerTypes": true,
+      "importBasePath": "github.com/xtian/pulumi-chatto/sdk/go/chatto",
+      "respectSchemaVersion": true
+    },
+    "nodejs": {
+      "respectSchemaVersion": true
+    },
+    "python": {
+      "pyproject": {
+        "enabled": true
+      },
+      "respectSchemaVersion": true
+    }
+  },
+  "config": {
+    "variables": {
+      "apiKey": {
+        "type": "string",
+        "description": "Bot API key. The bot needs explicit grants for each permission it uses (room.create, room.manage, role.manage), which its owner must also hold. Can be set with CHATTO_API_KEY.",
+        "defaultInfo": {
+          "environment": [
+            "CHATTO_API_KEY"
+          ]
+        },
+        "secret": true
+      },
+      "url": {
+        "type": "string",
+        "description": "Base URL of the Chatto server, e.g. https://chat.example.com. Can be set with CHATTO_URL.",
+        "defaultInfo": {
+          "environment": [
+            "CHATTO_URL"
+          ]
+        }
+      }
+    }
+  },
+  "types": {
+    "chatto:index:Decision": {
+      "type": "string",
+      "enum": [
+        {
+          "name": "Allow",
+          "description": "Grant the permission.",
+          "value": "allow"
+        },
+        {
+          "name": "Deny",
+          "description": "Deny the permission, overriding broader grants.",
+          "value": "deny"
+        }
+      ]
+    },
+    "chatto:index:Permission": {
+      "type": "string",
+      "enum": [
+        {
+          "name": "AdminViewAudit",
+          "description": "Category: admin. Scopes: server.",
+          "value": "admin.view-audit"
+        },
+        {
+          "name": "AdminViewUsers",
+          "description": "Category: admin. Scopes: server.",
+          "value": "admin.view-users"
+        },
+        {
+          "name": "BotCreate",
+          "description": "Category: bot. Scopes: server.",
+          "value": "bot.create"
+        },
+        {
+          "name": "BotManage",
+          "description": "Category: bot. Scopes: server.",
+          "value": "bot.manage"
+        },
+        {
+          "name": "CallCamera",
+          "description": "Category: call. Scopes: server, group, room, dm.",
+          "value": "call.camera"
+        },
+        {
+          "name": "CallJoin",
+          "description": "Category: call. Scopes: server, group, room, dm.",
+          "value": "call.join"
+        },
+        {
+          "name": "CallScreenshare",
+          "description": "Category: call. Scopes: server, group, room, dm.",
+          "value": "call.screenshare"
+        },
+        {
+          "name": "CallStart",
+          "description": "Category: call. Scopes: server, group, room, dm.",
+          "value": "call.start"
+        },
+        {
+          "name": "CallVoice",
+          "description": "Category: call. Scopes: server, group, room, dm.",
+          "value": "call.voice"
+        },
+        {
+          "name": "MessageAttach",
+          "description": "Category: message. Scopes: server, group, room, dm.",
+          "value": "message.attach"
+        },
+        {
+          "name": "MessageEcho",
+          "description": "Category: message. Scopes: server, group, room, dm.",
+          "value": "message.echo"
+        },
+        {
+          "name": "MessageManage",
+          "description": "Category: message. Scopes: server, group, room, dm.",
+          "value": "message.manage"
+        },
+        {
+          "name": "MessagePin",
+          "description": "Category: message. Scopes: server, group, room.",
+          "value": "message.pin"
+        },
+        {
+          "name": "MessagePost",
+          "description": "Category: message. Scopes: server, group, room, dm.",
+          "value": "message.post"
+        },
+        {
+          "name": "MessagePostInInteractions",
+          "description": "Category: message. Scopes: server, group, room, dm.",
+          "value": "message.post-in-interactions"
+        },
+        {
+          "name": "MessagePostInThread",
+          "description": "Category: message. Scopes: server, group, room, dm.",
+          "value": "message.post-in-thread"
+        },
+        {
+          "name": "MessageReact",
+          "description": "Category: message. Scopes: server, group, room, dm.",
+          "value": "message.react"
+        },
+        {
+          "name": "MessageRead",
+          "description": "Category: message. Scopes: server, group, room, dm.",
+          "value": "message.read"
+        },
+        {
+          "name": "MessageReadInteractions",
+          "description": "Category: message. Scopes: server, group, room, dm.",
+          "value": "message.read-interactions"
+        },
+        {
+          "name": "RoleAssign",
+          "description": "Category: role. Scopes: server.",
+          "value": "role.assign"
+        },
+        {
+          "name": "RoleManage",
+          "description": "Category: role. Scopes: server.",
+          "value": "role.manage"
+        },
+        {
+          "name": "RoomCreate",
+          "description": "Category: room. Scopes: server, group.",
+          "value": "room.create"
+        },
+        {
+          "name": "RoomInvite",
+          "description": "Category: room. Scopes: server, group, room.",
+          "value": "room.invite"
+        },
+        {
+          "name": "RoomJoin",
+          "description": "Category: room. Scopes: server, group, room.",
+          "value": "room.join"
+        },
+        {
+          "name": "RoomList",
+          "description": "Category: room. Scopes: server, group, room.",
+          "value": "room.list"
+        },
+        {
+          "name": "RoomManage",
+          "description": "Category: room. Scopes: server, group, room.",
+          "value": "room.manage"
+        },
+        {
+          "name": "RoomManageNotice",
+          "description": "Category: room. Scopes: server, group, room.",
+          "value": "room.manage-notice"
+        },
+        {
+          "name": "RoomRemoveMember",
+          "description": "Category: room. Scopes: server, group, room.",
+          "value": "room.remove-member"
+        },
+        {
+          "name": "ServerManage",
+          "description": "Category: server. Scopes: server.",
+          "value": "server.manage"
+        },
+        {
+          "name": "ServerManageNeighbors",
+          "description": "Category: server. Scopes: server.",
+          "value": "server.manage-neighbors"
+        },
+        {
+          "name": "UserDeleteAny",
+          "description": "Category: user. Scopes: server.",
+          "value": "user.delete-any"
+        },
+        {
+          "name": "UserDeleteSelf",
+          "description": "Category: user. Scopes: server.",
+          "value": "user.delete-self"
+        },
+        {
+          "name": "UserInvite",
+          "description": "Category: user. Scopes: server.",
+          "value": "user.invite"
+        },
+        {
+          "name": "UserManageAccounts",
+          "description": "Category: user. Scopes: server.",
+          "value": "user.manage-accounts"
+        },
+        {
+          "name": "UserManageInvites",
+          "description": "Category: user. Scopes: server.",
+          "value": "user.manage-invites"
+        },
+        {
+          "name": "UserManagePermissions",
+          "description": "Category: user. Scopes: server.",
+          "value": "user.manage-permissions"
+        }
+      ]
+    },
+    "chatto:index:ScopeKind": {
+      "type": "string",
+      "enum": [
+        {
+          "name": "DM",
+          "description": "Applies in direct-message rooms.",
+          "value": "dm"
+        },
+        {
+          "name": "Group",
+          "description": "Applies within one room group.",
+          "value": "group"
+        },
+        {
+          "name": "Room",
+          "description": "Applies within one room.",
+          "value": "room"
+        },
+        {
+          "name": "Server",
+          "description": "Applies server-wide.",
+          "value": "server"
+        }
+      ]
+    },
+    "chatto:index:ThreadingMode": {
+      "type": "string",
+      "enum": [
+        {
+          "name": "Enabled",
+          "description": "Replies may be threaded or inline.",
+          "value": "enabled"
+        },
+        {
+          "name": "Encouraged",
+          "description": "Clients steer replies into threads.",
+          "value": "encouraged"
+        },
+        {
+          "name": "Required",
+          "description": "Every root message starts a thread.",
+          "value": "required"
+        }
+      ]
+    }
+  },
+  "provider": {
+    "properties": {
+      "apiKey": {
+        "type": "string",
+        "description": "Bot API key. The bot needs explicit grants for each permission it uses (room.create, room.manage, role.manage), which its owner must also hold. Can be set with CHATTO_API_KEY.",
+        "defaultInfo": {
+          "environment": [
+            "CHATTO_API_KEY"
+          ]
+        },
+        "secret": true
+      },
+      "url": {
+        "type": "string",
+        "description": "Base URL of the Chatto server, e.g. https://chat.example.com. Can be set with CHATTO_URL.",
+        "defaultInfo": {
+          "environment": [
+            "CHATTO_URL"
+          ]
+        }
+      }
+    },
+    "inputProperties": {
+      "apiKey": {
+        "type": "string",
+        "description": "Bot API key. The bot needs explicit grants for each permission it uses (room.create, room.manage, role.manage), which its owner must also hold. Can be set with CHATTO_API_KEY.",
+        "defaultInfo": {
+          "environment": [
+            "CHATTO_API_KEY"
+          ]
+        },
+        "secret": true
+      },
+      "url": {
+        "type": "string",
+        "description": "Base URL of the Chatto server, e.g. https://chat.example.com. Can be set with CHATTO_URL.",
+        "defaultInfo": {
+          "environment": [
+            "CHATTO_URL"
+          ]
+        }
+      }
+    }
+  },
+  "resources": {
+    "chatto:index:Bot": {
+      "description": "A Chatto bot account. The resource ID is the bot's user ID. Chatto makes the human owner of the provider's API key the owner of the bot. Deleting the resource deletes the bot.",
+      "properties": {
+        "apiKey": {
+          "type": "string",
+          "description": "The API key Chatto issues when it creates the bot. Chatto shows it only once, so it is unset on imported bots.",
+          "secret": true
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Public display name, up to 32 characters. Defaults to `login`."
+        },
+        "login": {
+          "type": "string",
+          "description": "Bot username. Chatto allows one change every 30 days unless the provider's API key has user.manage-accounts."
+        },
+        "ownerUserId": {
+          "type": "string",
+          "description": "User ID of the bot's human owner. Bot permissions never exceed the owner's."
+        }
+      },
+      "required": [
+        "login",
+        "ownerUserId"
+      ],
+      "inputProperties": {
+        "displayName": {
+          "type": "string",
+          "description": "Public display name, up to 32 characters. Defaults to `login`."
+        },
+        "login": {
+          "type": "string",
+          "description": "Bot username. Chatto allows one change every 30 days unless the provider's API key has user.manage-accounts."
+        }
+      },
+      "requiredInputs": [
+        "login"
+      ]
+    },
+    "chatto:index:BotPermission": {
+      "description": "Grants one permission to a bot at server, group, room, or DM scope. A bot can use a permission only while its owner also holds it. Deleting the resource removes the grant. Import with `<botUserId>/<permission>/server`, `<botUserId>/<permission>/dm`, `<botUserId>/<permission>/group/<groupId>`, or `<botUserId>/<permission>/room/<roomId>`.",
+      "properties": {
+        "botUserId": {
+          "type": "string",
+          "description": "User ID of the bot, e.g. the ID of a Bot resource.",
+          "replaceOnChanges": true
+        },
+        "permission": {
+          "$ref": "#/types/chatto:index:Permission",
+          "description": "Permission identifier. Each permission can be set only at the scopes it lists.",
+          "replaceOnChanges": true
+        },
+        "scopeId": {
+          "type": "string",
+          "description": "Room group ID for `group` scope, or room ID for `room` scope.",
+          "replaceOnChanges": true
+        },
+        "scopeKind": {
+          "$ref": "#/types/chatto:index:ScopeKind",
+          "description": "Where the grant applies.",
+          "default": "server",
+          "replaceOnChanges": true
+        }
+      },
+      "required": [
+        "botUserId",
+        "permission",
+        "scopeKind"
+      ],
+      "inputProperties": {
+        "botUserId": {
+          "type": "string",
+          "description": "User ID of the bot, e.g. the ID of a Bot resource.",
+          "replaceOnChanges": true
+        },
+        "permission": {
+          "$ref": "#/types/chatto:index:Permission",
+          "description": "Permission identifier. Each permission can be set only at the scopes it lists.",
+          "replaceOnChanges": true
+        },
+        "scopeId": {
+          "type": "string",
+          "description": "Room group ID for `group` scope, or room ID for `room` scope.",
+          "replaceOnChanges": true
+        },
+        "scopeKind": {
+          "$ref": "#/types/chatto:index:ScopeKind",
+          "description": "Where the grant applies.",
+          "default": "server",
+          "replaceOnChanges": true
+        }
+      },
+      "requiredInputs": [
+        "botUserId",
+        "permission"
+      ]
+    },
+    "chatto:index:Role": {
+      "description": "A custom Chatto role. The resource ID is the role name.",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Role description, up to 500 characters.",
+          "default": ""
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Name shown in admin and mention UIs, up to 80 characters. Defaults to `name`."
+        },
+        "name": {
+          "type": "string",
+          "description": "Stable role name, e.g. the name an OIDC group maps to. Changing it replaces the role.",
+          "replaceOnChanges": true
+        },
+        "pingable": {
+          "type": "boolean",
+          "description": "Whether messages can mention the role to notify its members.",
+          "default": false
+        },
+        "position": {
+          "type": "integer",
+          "description": "Position in the role hierarchy."
+        },
+        "requiresShieldMode": {
+          "type": "boolean",
+          "description": "Whether members must select the role in Shield Mode before its grants apply.",
+          "default": false
+        }
+      },
+      "required": [
+        "description",
+        "name",
+        "pingable",
+        "requiresShieldMode",
+        "position"
+      ],
+      "inputProperties": {
+        "description": {
+          "type": "string",
+          "description": "Role description, up to 500 characters.",
+          "default": ""
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Name shown in admin and mention UIs, up to 80 characters. Defaults to `name`."
+        },
+        "name": {
+          "type": "string",
+          "description": "Stable role name, e.g. the name an OIDC group maps to. Changing it replaces the role.",
+          "replaceOnChanges": true
+        },
+        "pingable": {
+          "type": "boolean",
+          "description": "Whether messages can mention the role to notify its members.",
+          "default": false
+        },
+        "requiresShieldMode": {
+          "type": "boolean",
+          "description": "Whether members must select the role in Shield Mode before its grants apply.",
+          "default": false
+        }
+      },
+      "requiredInputs": [
+        "name"
+      ]
+    },
+    "chatto:index:RolePermission": {
+      "description": "An explicit allow or deny of one permission for a role at server, group, room, or DM scope. Deleting it clears the decision. Import with `<roleName>/<permission>/server`, `<roleName>/<permission>/dm`, `<roleName>/<permission>/group/<groupId>`, or `<roleName>/<permission>/room/<roomId>`.",
+      "properties": {
+        "decision": {
+          "$ref": "#/types/chatto:index:Decision",
+          "description": "Whether the role is allowed or denied the permission."
+        },
+        "permission": {
+          "$ref": "#/types/chatto:index:Permission",
+          "description": "Permission identifier. Each permission can be set only at the scopes it lists.",
+          "replaceOnChanges": true
+        },
+        "roleName": {
+          "type": "string",
+          "description": "Name of the role, including system roles such as `everyone` and `moderator`.",
+          "replaceOnChanges": true
+        },
+        "scopeId": {
+          "type": "string",
+          "description": "Room group ID for `group` scope, or room ID for `room` scope.",
+          "replaceOnChanges": true
+        },
+        "scopeKind": {
+          "$ref": "#/types/chatto:index:ScopeKind",
+          "description": "Where the decision applies.",
+          "default": "server",
+          "replaceOnChanges": true
+        }
+      },
+      "required": [
+        "decision",
+        "permission",
+        "roleName",
+        "scopeKind"
+      ],
+      "inputProperties": {
+        "decision": {
+          "$ref": "#/types/chatto:index:Decision",
+          "description": "Whether the role is allowed or denied the permission."
+        },
+        "permission": {
+          "$ref": "#/types/chatto:index:Permission",
+          "description": "Permission identifier. Each permission can be set only at the scopes it lists.",
+          "replaceOnChanges": true
+        },
+        "roleName": {
+          "type": "string",
+          "description": "Name of the role, including system roles such as `everyone` and `moderator`.",
+          "replaceOnChanges": true
+        },
+        "scopeId": {
+          "type": "string",
+          "description": "Room group ID for `group` scope, or room ID for `room` scope.",
+          "replaceOnChanges": true
+        },
+        "scopeKind": {
+          "$ref": "#/types/chatto:index:ScopeKind",
+          "description": "Where the decision applies.",
+          "default": "server",
+          "replaceOnChanges": true
+        }
+      },
+      "requiredInputs": [
+        "decision",
+        "permission",
+        "roleName"
+      ]
+    },
+    "chatto:index:Room": {
+      "description": "A Chatto channel room. Chatto can't delete rooms, so deleting this resource archives the room. Room names are unique across the server, including archived rooms.",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Room description, up to 500 characters.",
+          "default": ""
+        },
+        "groupId": {
+          "type": "string",
+          "description": "ID of the room group that contains the room. Changing it moves the room."
+        },
+        "name": {
+          "type": "string",
+          "description": "Room name, 1-30 characters."
+        },
+        "slowModeSeconds": {
+          "type": "integer",
+          "description": "Minimum seconds between a member's root messages, up to 21600. 0 disables slow mode.",
+          "default": 0
+        },
+        "threadingMode": {
+          "$ref": "#/types/chatto:index:ThreadingMode",
+          "description": "How the room uses threads.",
+          "default": "enabled"
+        },
+        "universal": {
+          "type": "boolean",
+          "description": "Whether every eligible server member is a member of the room.",
+          "default": false
+        }
+      },
+      "required": [
+        "description",
+        "groupId",
+        "name",
+        "slowModeSeconds",
+        "threadingMode",
+        "universal"
+      ],
+      "inputProperties": {
+        "description": {
+          "type": "string",
+          "description": "Room description, up to 500 characters.",
+          "default": ""
+        },
+        "groupId": {
+          "type": "string",
+          "description": "ID of the room group that contains the room. Changing it moves the room."
+        },
+        "name": {
+          "type": "string",
+          "description": "Room name, 1-30 characters."
+        },
+        "slowModeSeconds": {
+          "type": "integer",
+          "description": "Minimum seconds between a member's root messages, up to 21600. 0 disables slow mode.",
+          "default": 0
+        },
+        "threadingMode": {
+          "$ref": "#/types/chatto:index:ThreadingMode",
+          "description": "How the room uses threads.",
+          "default": "enabled"
+        },
+        "universal": {
+          "type": "boolean",
+          "description": "Whether every eligible server member is a member of the room.",
+          "default": false
+        }
+      },
+      "requiredInputs": [
+        "groupId",
+        "name"
+      ]
+    },
+    "chatto:index:RoomGroup": {
+      "description": "A Chatto room group. Chatto only deletes empty groups, and archived rooms still count, so a group can't be deleted once it has held a room.",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Public group description.",
+          "default": ""
+        },
+        "name": {
+          "type": "string",
+          "description": "Group display name, up to 80 characters."
+        }
+      },
+      "required": [
+        "description",
+        "name"
+      ],
+      "inputProperties": {
+        "description": {
+          "type": "string",
+          "description": "Public group description.",
+          "default": ""
+        },
+        "name": {
+          "type": "string",
+          "description": "Group display name, up to 80 characters."
+        }
+      },
+      "requiredInputs": [
+        "name"
+      ]
+    },
+    "chatto:index:RoomMember": {
+      "description": "Adds a user or bot to a channel room as an explicit member, for example so a bot can post to a room that isn't universal. Adding someone else needs room.manage for the room or user.manage-accounts. Universal, DM, and archived rooms can't take explicit members. Deleting the resource removes the member. Import with `<roomId>/<userId>`.",
+      "properties": {
+        "roomId": {
+          "type": "string",
+          "description": "ID of the channel room, e.g. the ID of a Room resource.",
+          "replaceOnChanges": true
+        },
+        "userId": {
+          "type": "string",
+          "description": "User ID of the member, e.g. the ID of a Bot resource.",
+          "replaceOnChanges": true
+        }
+      },
+      "required": [
+        "roomId",
+        "userId"
+      ],
+      "inputProperties": {
+        "roomId": {
+          "type": "string",
+          "description": "ID of the channel room, e.g. the ID of a Room resource.",
+          "replaceOnChanges": true
+        },
+        "userId": {
+          "type": "string",
+          "description": "User ID of the member, e.g. the ID of a Bot resource.",
+          "replaceOnChanges": true
+        }
+      },
+      "requiredInputs": [
+        "roomId",
+        "userId"
+      ]
+    }
+  },
+  "functions": {
+    "chatto:index:getViewer": {
+      "description": "Looks up the account that the provider's API key belongs to, e.g. to grant the provider's own bot permissions with BotPermission.",
+      "inputs": {
+        "type": "object"
+      },
+      "outputs": {
+        "properties": {
+          "bot": {
+            "description": "Whether the account is a bot.",
+            "type": "boolean"
+          },
+          "displayName": {
+            "description": "Display name.",
+            "type": "string"
+          },
+          "id": {
+            "description": "User ID.",
+            "type": "string"
+          },
+          "login": {
+            "description": "Username.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "bot",
+          "displayName",
+          "id",
+          "login"
+        ],
+        "type": "object"
+      }
+    }
+  }
+}

@@ -51,6 +51,7 @@
             "LICENSES/*"
             "internal/pb/**"
             "provider/permissions_gen.go"
+            "schema.json"
           ];
         }
       );
@@ -138,10 +139,18 @@
             go test -shuffle="''${PULUMI_CHATTO_GO_TEST_SHUFFLE:-on}" -timeout 5m ./...
           '';
 
-          schema = script "schema" [ pkgs.pulumi-bin ] ''
-            ${pkgs.lib.getExe build}
-            pulumi package get-schema ./bin/pulumi-resource-chatto > schema.json
-          '';
+          # Committed for the Pulumi Registry, which reads it at each release tag. The version is dropped
+          # because the Registry takes it from the tag, and dev builds would otherwise embed 0.0.1-dev.
+          schema =
+            script "schema"
+              [
+                pkgs.jq
+                pkgs.pulumi-bin
+              ]
+              ''
+                ${pkgs.lib.getExe build}
+                pulumi package get-schema ./bin/pulumi-resource-chatto | jq 'del(.version)' > schema.json
+              '';
 
           sdk = script "sdk" [ pkgs.pulumi-bin ] ''
             ${pkgs.lib.getExe build}
@@ -163,6 +172,11 @@
 
                 git diff --exit-code -- internal/pb provider/permissions_gen.go ||
                   { echo 'Generated code is stale. Run generate.' >&2; exit 1; }
+
+                ${pkgs.lib.getExe schema}
+
+                git diff --exit-code -- schema.json ||
+                  { echo 'schema.json is stale. Run schema.' >&2; exit 1; }
 
                 reuse lint
                 actionlint
