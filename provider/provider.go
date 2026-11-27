@@ -15,8 +15,13 @@ import (
 // Name is the Pulumi package name of the provider.
 const Name = "chatto"
 
-// Provider builds the Chatto provider.
-func Provider() (p.Provider, error) {
+// userAgent identifies the provider and its version to the Chatto server.
+var userAgent = "pulumi-chatto"
+
+// Provider builds the Chatto provider at the given version.
+func Provider(version string) (p.Provider, error) {
+	userAgent = "pulumi-chatto/" + version
+
 	return infer.NewProviderBuilder().
 		WithConfig(infer.Config(&Config{})).
 		WithDescription("Manage Chatto bots, bot permissions, rooms, room groups, room members, roles, and role permissions.").
@@ -70,7 +75,7 @@ func (c *Config) Configure(context.Context) error {
 		return errors.New("chatto:apiKey (or CHATTO_API_KEY) is required")
 	}
 
-	c.client = newClient(&http.Client{Timeout: time.Minute}, *c.URL, *c.APIKey)
+	c.client = newClient(&http.Client{Timeout: time.Minute}, *c.URL, *c.APIKey, userAgent)
 	return nil
 }
 

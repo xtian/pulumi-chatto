@@ -22,9 +22,9 @@ type client struct {
 	viewer      apiv1connect.ViewerServiceClient
 }
 
-func newClient(httpClient *http.Client, baseURL, apiKey string) *client {
+func newClient(httpClient *http.Client, baseURL, apiKey, userAgent string) *client {
 	url := strings.TrimSuffix(baseURL, "/") + "/api/connect"
-	options := connect.WithInterceptors(bearerAuth(apiKey))
+	options := connect.WithInterceptors(headers(apiKey, userAgent))
 
 	return &client{
 		bots:        apiv1connect.NewBotServiceClient(httpClient, url, options),
@@ -37,10 +37,12 @@ func newClient(httpClient *http.Client, baseURL, apiKey string) *client {
 	}
 }
 
-func bearerAuth(apiKey string) connect.UnaryInterceptorFunc {
+// headers authenticates each request and identifies the provider to the server.
+func headers(apiKey, userAgent string) connect.UnaryInterceptorFunc {
 	return func(next connect.UnaryFunc) connect.UnaryFunc {
 		return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
 			req.Header().Set("Authorization", "Bearer "+apiKey)
+			req.Header().Set("User-Agent", userAgent)
 			return next(ctx, req)
 		}
 	}

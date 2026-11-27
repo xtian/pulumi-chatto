@@ -12,7 +12,7 @@ import (
 var version = "0.0.1-dev"
 
 func main() {
-	chatto, err := provider.Provider()
+	chatto, err := provider.Provider(version)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

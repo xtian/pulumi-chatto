@@ -17,12 +17,14 @@ import (
 type fakeRoles struct {
 	adminv1connect.UnimplementedAdminRoleServiceHandler
 	authorization string
+	userAgent     string
 }
 
 func (f *fakeRoles) GetRole(
 	_ context.Context, req *connect.Request[adminv1.GetRoleRequest],
 ) (*connect.Response[adminv1.GetRoleResponse], error) {
 	f.authorization = req.Header().Get("Authorization")
+	f.userAgent = req.Header().Get("User-Agent")
 	if req.Msg.GetName() != "tech" {
 		return nil, connect.NewError(connect.CodeNotFound, nil)
 	}
@@ -39,7 +41,7 @@ func TestClient(t *testing.T) {
 	server := httptest.NewServer(mux)
 	defer server.Close()
 
-	c := newClient(server.Client(), server.URL+"/", "test-key")
+	c := newClient(server.Client(), server.URL+"/", "test-key", "pulumi-chatto/1.2.3")
 
 	tests := []struct {
 		name         string
@@ -57,6 +59,9 @@ func TestClient(t *testing.T) {
 
 			if got, want := fake.authorization, "Bearer test-key"; got != want {
 				t.Fatalf("Authorization = %q, want %q", got, want)
+			}
+			if got, want := fake.userAgent, "pulumi-chatto/1.2.3"; got != want {
+				t.Fatalf("User-Agent = %q, want %q", got, want)
 			}
 			if got := isNotFound(err); got != tt.wantNotFound {
 				t.Fatalf("isNotFound(%v) = %v, want %v", err, got, tt.wantNotFound)
